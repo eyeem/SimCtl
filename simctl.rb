@@ -71,7 +71,16 @@ end
 
 module SimCtl
     module_function
-
+    
+    @@CurrentDevice = nil
+    def get_current_device
+        @@CurrentDevice
+    end
+    
+    def set_current_device(name = default_device_hardware(), runtime = default_device_os())
+        @@CurrentDevice = find_device(name, runtime)
+    end
+        
     def runtimes
         hash = {}
     
@@ -190,6 +199,23 @@ module SimCtl
         end
  
     end
+    
+    def find_device(name = default_device_hardware(), runtime = default_device_os())
+        devices = SimCtl.devices.select { |d|
+            d.name.gsub(/\s+/, "").casecmp(name.gsub(/\s+/, "")) == 0 and d.runtime.name[runtime]
+        }
+
+        case devices.length
+        when 0
+            raise 'No device with name "' + name + '" and runtime "' + runtime + '" found.'
+        when 1
+            devices.first
+        else
+            # Always return the first simulator if there are many...
+            return devices.first
+        end
+    end
+
 
     # Figure this will be the goto method in testing
     def create_or_find(name)
@@ -239,6 +265,37 @@ class SimCtl::SimDevice
 
     def runcmd(command, other_args = nil)
         SimCtl.cmd("#{command} #{self.id} #{other_args || ''}")
+    end
+
+    # kill          Make sure we're back to initial state 
+    def kill
+      if booted
+        self.shutdown
+      end
+      %x[killall "iOS Simulator" 2>/dev/null]
+    end
+
+    # restart       Make sure this device is killed, then start again
+    def restart
+      if booted then
+        kill
+      end
+      start
+    end
+
+    # open          Launch the simulator with this device
+    def open
+      # Opening the simulator with a specific UDID will boot the device
+      if booted
+        shutdown
+      end
+      %x[open -a 'iOS Simulator' --args -CurrentDeviceUDID #{self.id}]
+      sleep 0.5
+    end
+
+    # Human readable description
+    def inspect
+       "#{self.name}~#{self.runtime.name}".gsub(/\s+/, "")
     end
 
     # erase         Erase a device's contents and settings.
