@@ -355,8 +355,8 @@ class SimCtl::SimDevice
     end
 
     # launch        Launch an application by identifier on a device.
-    def launch(app_id)
-        runcmd 'launch', app_id
+    def launch(app_id, args)
+        runcmd 'launch', "#{app_id} #{args}" 
     end
 
     # spawn         Spawn a process on a device.
