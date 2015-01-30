@@ -262,6 +262,10 @@ end
 # This is where the bulk of command-line simctl functionality lives/will-live.
 
 class SimCtl::SimDevice
+			
+		def simulator_process
+			%x[ps aux | grep "[i]OS Simulator"]
+		end
 
     def runcmd(command, other_args = nil)
         SimCtl.cmd("#{command} #{self.id} #{other_args || ''}")
@@ -272,7 +276,9 @@ class SimCtl::SimDevice
       if booted
         self.shutdown
       end
+									
       %x[killall "iOS Simulator" 2>/dev/null]
+			sleep 2
     end
 
     # restart       Make sure this device is killed, then start again
@@ -290,7 +296,7 @@ class SimCtl::SimDevice
         shutdown
       end
       %x[open -a 'iOS Simulator' --args -CurrentDeviceUDID #{self.id}]
-      sleep 0.5
+      sleep 2
     end
 
     # Human readable description
