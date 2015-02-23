@@ -295,8 +295,9 @@ class SimCtl::SimDevice
       if booted
         shutdown
       end
-      %x[open -a 'iOS Simulator' --args -CurrentDeviceUDID #{self.id}]
-      sleep 2
+      sim = %x[/usr/bin/xcode-select -p].gsub("\n", "/Applications/iOS Simulator.app")
+      %x[open -g -a '#{sim}' --args -CurrentDeviceUDID #{self.id}]
+      sleep 0.5
     end
 
     # Human readable description
