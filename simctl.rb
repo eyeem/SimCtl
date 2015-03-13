@@ -202,7 +202,11 @@ module SimCtl
     
     def find_device(name = default_device_hardware(), runtime = default_device_os())
         devices = SimCtl.devices.select { |d|
-            d.name.gsub(/\s+/, "").casecmp(name.gsub(/\s+/, "")) == 0 and d.runtime.name[runtime]
+                  if (!d.name.nil? && !d.runtime.nil? && !d.runtime.name.nil?)
+				            d.name.gsub(/\s+/, "").casecmp(name.gsub(/\s+/, "")) == 0 and d.runtime.name[runtime]
+                  else
+                  	false
+                  end
         }
 
         case devices.length
